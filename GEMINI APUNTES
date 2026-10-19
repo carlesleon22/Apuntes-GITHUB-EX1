@@ -1,0 +1,166 @@
+# 📚 Chuleta Definitiva: Git, GitHub Actions, Pages y Buenas Prácticas
+
+---
+
+## 1. Conceptos Fundamentales y Arquitectura de Git
+
+* **Sistema de Control de Versiones (SCV):** Sistema que registra los cambios realizados en uno o varios archivos a lo largo del tiempo para recuperar versiones específicas.
+* **Repositorio (Repository):** Lugar donde se guardan los archivos actuales y todo el historial de cambios.
+* **Tronco / Rama Principal (`master` / `main`):** Rama principal del repositorio desde la cual se bifurcan las demás.
+* **Rama (`Branch`):** Bifurcación independiente del código para desarrollar funcionalidades o corregir errores sin afectar el tronco principal.
+* **HEAD:** Puntero que referencia a la versión o commit más reciente de la rama activa.
+* **Copia de trabajo (`Working copy`):** Copia local de los archivos donde el usuario realiza modificaciones.
+* **Commit:** Instantánea guardada localmente de los cambios realizados.
+* **Merge:** Combinar los cambios de dos ramas independientes en una sola.
+
+### 🔄 Los 3 Estados de los Archivos
+1. **Modificado (`Modified`):** El archivo ha cambiado en el directorio de trabajo pero aún no está marcado.
+2. **Preparado (`Staged / Staging Area`):** Los archivos modificados se han marcado para la próxima confirmación.
+3. **Confirmado (`Committed`):** Los datos están almacenados de forma segura en la base de datos local de `.git`.
+
+### 🛠️ Las 3 Áreas de Trabajo
+* **Working Directory:** Directorio local donde se modifican físicamente los archivos.
+* **Staging Area (Index):** Zona intermedia donde se agrupan las modificaciones preparadas para el commit.
+* **Git Directory (`.git`):** Base de datos que almacena la metainformación y los objetos.
+
+---
+
+## 2. Comandos Locales, Estados y `.gitignore`
+
+### Inicialización y Configuración
+```bash
+# Configurar usuario global
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu@email.com"
+
+# Inicializar un repositorio local (crea la carpeta oculta .git)
+git init
+Flujo de Trabajo Básico
+Bash
+# Ver el estado de los archivos (modificados, staged, untracked)
+git status
+
+# Añadir archivos al Staging Area
+git add archivo.txt     # Añade un archivo específico
+git add .               # Añade todos los archivos modificados/nuevos
+
+# Guardar los cambios (Commit)
+git commit -m "Mensaje explicativo del cambio"
+
+# Ver el historial de commits
+git log --oneline
+🚫 Archivos Ignorados (.gitignore)
+Permite definir reglas para omitir archivos temporales, binarios o credenciales. Se crea un archivo llamado exactamente .gitignore en la raíz del proyecto.
+
+Ejemplo de contenido:
+
+Plaintext
+node_modules/
+.env
+*.log
+3. Gestión de Errores e Historial (reset vs revert)
+git reset (Borrón y cuenta nueva - Solo en local / Antes de hacer Push):
+Mueve el puntero HEAD hacia atrás y borra los commits del historial.
+
+Bash
+git reset --hard HEAD^   # Borra el último commit y descarta los cambios
+git reset archivo.txt    # Saca un archivo del Staging Area sin perder cambios
+git revert (Opción segura - Ideal después de hacer Push):
+No borra el historial. Crea un nuevo commit que hace exactamente lo opuesto al commit erróneo.
+
+Bash
+git revert <hash_del_commit>
+4. Trabajo con Ramas, Fusión y Etiquetas
+Ramas (Branch y Checkout)
+Bash
+git branch -a                   # Muestra todas las ramas (locales y remotas)
+git branch nueva-rama           # Crea una nueva rama
+git checkout nueva-rama         # Cambia a la rama seleccionada
+git checkout -b nueva-rama      # Crea la rama y cambia a ella al instante
+Fusión (Merge)
+Antes de fusionar, asegúrate de estar en la rama receptora y tener todo actualizado:
+
+Bash
+git checkout main
+git merge nueva-rama            # Integra los cambios de 'nueva-rama' en 'main'
+Etiquetas (Tag)
+Se usan para marcar versiones importantes (ej. v1.0):
+
+Bash
+git tag v1.0                    # Crear etiqueta local
+git push origin v1.0            # Subir etiqueta al servidor remoto
+git push origin --tags          # Subir todas las etiquetas
+5. Repositorios Remotos y Sincronización
+Bash
+# Clonar un repositorio existente
+git clone [https://github.com/usuario/repo.git](https://github.com/usuario/repo.git)
+
+# Vincular un repositorio local con la nube por primera vez
+git remote add origin [https://github.com/usuario/repo.git](https://github.com/usuario/repo.git)
+
+# Sincronización
+git push -u origin main         # Sube los cambios y vincula la rama por defecto
+git pull origin main            # Descarga y fusiona los cambios remotos
+git fetch origin                # Descarga información remota sin fusionar automáticamente
+6. Colaboración (Fork y Pull Request)
+Fork: Copia un repositorio ajeno a tu cuenta de GitHub para experimentar sin alterar el original.
+
+Vincular el original (upstream):
+
+Bash
+git remote add upstream [https://github.com/autor-original/repo.git](https://github.com/autor-original/repo.git)
+git fetch upstream
+Pull Request (PR): Proponer cambios desde tu Fork hacia el repositorio original a través de la interfaz web de GitHub.
+
+7. GitHub Pages (Despliegue Web)
+Permite alojar sitios web estáticos directamente desde un repositorio.
+
+Pasos:
+
+Subir los archivos HTML/Markdown a la rama principal (main).
+
+Ir a Settings -> Pages en tu repositorio de GitHub.
+
+En Source, seleccionar Deploy from a branch, elegir la rama main y la carpeta /(root), y guardar.
+
+8. GitHub Actions y CI/CD (Workflows y YAML)
+Los flujos de trabajo se escriben en YAML y deben guardarse obligatoriamente en la ruta .github/workflows/nombre.yml.
+
+Estructura Básica de un Workflow
+YAML
+name: Mi Workflow de Examen
+on: [push]                  # Evento que activa el flujo (ej. push)
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest  # Entorno del runner (servidor virtual)
+    steps:
+      - name: Descargar código del repositorio
+        uses: actions/checkout@v3
+
+      - name: Ejecutar comando de terminal
+        run: echo "¡El robot de GitHub ha ejecutado esto con éxito!"
+Elementos clave del YAML:
+on: Define los eventos desencadenantes (push, pull_request, etc.).
+
+runs-on: Especifica el sistema operativo del runner (ubuntu-latest, windows-latest).
+
+uses: Invoca una Action predefinida de terceros o oficial.
+
+run: Ejecuta comandos de consola de shell directamente.
+
+9. Acciones Personalizadas (Custom Actions)
+Toda acción personalizada requiere obligatoriamente un archivo de metadatos llamado action.yml (o action.yaml) en la raíz de su carpeta.
+
+Ejemplo de action.yml (JavaScript)
+YAML
+name: 'Hello World Custom Action'
+description: 'Saluda a alguien'
+inputs:
+  who-to-greet:
+    description: 'A quién saludar'
+    required: true
+    default: 'World'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
